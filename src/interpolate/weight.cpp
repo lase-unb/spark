@@ -55,8 +55,8 @@ void weight_to_grid(const spark::particle::ChargedSpecies<2, NV>& species,
         const size_t j = static_cast<size_t>(floor(xp_dx));
         const size_t k = static_cast<size_t>(floor(yp_dy));
 
-        const double x_local = xp_dx - static_cast<double>(j); 
-        const double y_local = yp_dy - static_cast<double>(k); 
+        const double x_local = xp_dx - static_cast<double>(j);
+        const double y_local = yp_dy - static_cast<double>(k);
 
         const double w_jk = (1.0 - x_local) * (1.0 - y_local);
         const double w_j1k = x_local * (1.0 - y_local);
@@ -68,21 +68,16 @@ void weight_to_grid(const spark::particle::ChargedSpecies<2, NV>& species,
         grid_data(j, k + 1) += w_jk1;
         grid_data(j + 1, k + 1) += w_j1k1;
     }
+
     for (size_t j = 0; j < nx; j++) {
-        grid_data(j, 0) *= 2.0;     
-        grid_data(j, ny-1) *= 2.0;  
+        grid_data(j, 0) *= 2.0;
+        grid_data(j, ny - 1) *= 2.0;
     }
-    
+
     for (size_t k = 0; k < ny; k++) {
-        grid_data(0, k) *= 2.0;     
-        grid_data(nx-1, k) *= 2.0;  
+        grid_data(0, k) *= 2.0;
+        grid_data(nx - 1, k) *= 2.0;
     }
-
-    grid_data(0, 0) *= 2.0;         
-    grid_data(0, ny-1) *= 2.0;      
-    grid_data(nx-1, 0) *= 2.0;      
-    grid_data(nx-1, ny-1) *= 2.0;   
-
 }
 }  // namespace
 

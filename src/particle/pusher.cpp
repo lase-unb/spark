@@ -20,7 +20,7 @@ void spark::particle::move_particles(spark::particle::ChargedSpecies<1, 3>& spec
 
 template <>
 void spark::particle::move_particles(spark::particle::ChargedSpecies<2, 3>& species,
-                                     const core::TMatrix<core::Vec<2>, 2>& force,
+                                     const core::TMatrix<core::Vec<2>, 1>& force,
                                      const double dt) {
     const size_t n = species.n();
     auto* v = species.v();

@@ -30,9 +30,8 @@ add_library(spark STATIC
         src/collisions/scattering.cpp
         src/em/thomas_poisson.cpp
         src/em/util.cpp
-        include/spark/core/matrix.h
-        include/spark/em/electric_field.h
         src/em/electric_field.cpp
+        src/particle/tiled_boundary.cpp
 )
 
 if (SPARK_ENABLE_LOG_DEBUG OR SPARK_LOG_ALL)

@@ -9,8 +9,9 @@ namespace spark::spatial {
 
 template <unsigned N>
 struct GridProp {
-    core::Vec<N> l_;
-    core::Vec<N> dx_;
+    core::Vec<N> l;
+    core::Vec<N> dx;
+    core::ULongVec<N> n;
 };
 
 template <typename T, unsigned N>
@@ -18,9 +19,16 @@ class TUniformGrid {
 public:
     TUniformGrid() = default;
     TUniformGrid(const core::Vec<N>& l, const core::ULongVec<N>& n) {
-        l_ = l;
         data_.resize(n);
-        dx_ = l / (n.template to<double>() - 1.0);
+        prop_.l = l;
+        prop_.dx = l / (n.template to<double>() - 1.0);
+        prop_.n = n;
+
+        set({0});
+    }
+
+    TUniformGrid(const GridProp<N>& prop) : prop_(prop) {
+        data_.resize(prop_.n);
         set({0});
     }
 
@@ -31,8 +39,9 @@ public:
 
     auto n_total() const { return data_.count(); }
     auto n() const { return data_.size(); }
-    auto l() const { return l_; }
-    auto dx() const { return dx_; }
+    auto l() const { return prop_.l; }
+    auto dx() const { return prop_.dx; }
+    auto prop() const { return prop_; }
 
     void apply(T mul, T add) {
         const auto count = data_.count();
@@ -42,7 +51,7 @@ public:
     }
 
 private:
-    core::Vec<N> l_, dx_;
+    GridProp<N> prop_;
     core::TMatrix<T, N> data_;
 };
 

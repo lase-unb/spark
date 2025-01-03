@@ -80,7 +80,7 @@ struct TVec<T, 3> {
 };
 
 template <typename T, unsigned N>
-inline bool operator==(TVec<T, N>& a, TVec<T, N>& b) {
+inline bool operator==(const TVec<T, N>& a, const TVec<T, N>& b) {
     if constexpr (N == 1) {
         return a.x == b.x;
     } else if constexpr (N == 2) {
@@ -91,7 +91,7 @@ inline bool operator==(TVec<T, N>& a, TVec<T, N>& b) {
 }
 
 template <typename T, unsigned N>
-inline bool operator!=(TVec<T, N>& a, TVec<T, N>& b) {
+inline bool operator!=(const TVec<T, N>& a, const TVec<T, N>& b) {
     return !(a == b);
 }
 
