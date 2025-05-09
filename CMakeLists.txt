@@ -32,6 +32,7 @@ add_library(spark STATIC
         src/em/util.cpp
         src/em/electric_field.cpp
         src/particle/tiled_boundary.cpp
+        src/em/cylindrical_poisson.cpp
 )
 
 if (SPARK_ENABLE_LOG_DEBUG OR SPARK_LOG_ALL)
