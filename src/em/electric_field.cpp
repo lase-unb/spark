@@ -68,51 +68,42 @@ void electric_field_cylindrical(const spatial::UniformGrid<2>& phi, core::TMatri
     out.resize(phi.n());
     const auto [nz, nr] = out.size().to<int>();
     const auto& phi_mat = phi.data();
-    const double dr = phi.dx().x;
-    const double dz = phi.dx().y;
+    const double dz = phi.dx().x;
+    const double dr = phi.dx().y;
 
     for (int i = 0; i < nz; ++i) {
         for (int j = 0; j < nr; ++j) {
-            if (i > 0 && i < nz - 1) {
-                out(i, j).y = -(phi_mat(i + 1, j) - phi_mat(i - 1, j)) / (2.0 * dz);
-                
-            } else if (i == 0) {
-                if (nz >= 3) {
-                     out(i, j).y = -(-3.0 * phi_mat(i, j) + 4.0 * phi_mat(i + 1, j) - phi_mat(i + 2, j)) / (2.0 * dz);
-                } else if (nz == 2) {
-                     out(i, j).y = -(phi_mat(i + 1, j) - phi_mat(i, j)) / dz;
-                } else {
-                     out(i, j).y = 0.0;
-                }
+            const int i1 = clamp(0, nz - 1, i + 1);
+            const int i0 = clamp(0, nz - 1, i - 1);
+            const int j1 = clamp(0, nr - 1, j + 1);
+            const int j0 = clamp(0, nr - 1, j - 1);
 
-            } else if (i == nz - 1) {
-                 if (nz >= 3) {
-                     out(i, j).y = -(phi_mat(i - 2, j) - 4.0 * phi_mat(i - 1, j) + 3.0 * phi_mat(i, j)) / (2.0 * dz);
-                 } else if (nz == 2) {
-                     out(i, j).y = -(phi_mat(i, j) - phi_mat(i - 1, j)) / dz;
-                 } else {
-                      out(i, j).y = 0.0;
-                 }
+            if (i > 0 && i < nz - 1) {
+                out(i, j).y = -(phi_mat(i1, j) - phi_mat(i0, j)) / static_cast<double>(i1 - i0) * dz;
             } else {
                 out(i, j).y = 0.0;
             }
 
             if (j > 0 && j < nr - 1) {
-                out(i, j).x = -(phi_mat(i, j + 1) - phi_mat(i, j - 1)) / (2.0 * dr);
-            } else if (j == 0) {
-                out(i, j).x = 0.0;
-            } else if (j == nr - 1) {
-                 if (nr >= 3) {
-                     out(i, j).x = -(phi_mat(i, j - 2) - 4.0 * phi_mat(i, j - 1) + 3.0 * phi_mat(i, j)) / (2.0 * dr);
-                 } else if (nr == 2) {
-                      out(i, j).x = -(phi_mat(i, j) - phi_mat(i, j - 1)) / dr;
-                 } else {
-                     out(i, j).x = 0.0;
-                 }
+                out(i, j).x = -(phi_mat(i, j1) - phi_mat(i, j0)) / static_cast<double>(j1 - j0) * dr;
             } else {
-                out(i, j).x = 0.0;
+                    out(i, j).x = 0.0;
             }
         }
+    }
+
+    for (int i = 0; i < nz; ++i) {
+        out(i, 0).x = 0.0;
+    }
+
+    for (int i = 0; i < nz; ++i) {
+        out(i, 0).y = 2.0 * out(i, 1).y - out(i, 2).y;
+        out(i, nr - 1).y = 2.0 * out(i, nr - 2).y - out(i, nr - 3).y;
+    }
+        
+    for (int j = 0; j < nr; ++j) {
+        out(0, j).x = 2.0 * out(1, j).x - out(2, j).x;
+        out(nz - 1, j).x = 2.0 * out(nz - 2, j).x - out(nz - 3, j).x;
     }
 }
 

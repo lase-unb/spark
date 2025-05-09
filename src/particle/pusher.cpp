@@ -45,37 +45,37 @@ void spark::particle::move_particles(spark::particle::ChargedSpecies<2, 3>& spec
 template <unsigned NV>
 void move_particles_cylindrical(
     ChargedSpecies<2, NV>& species,
-    const core::TMatrix<core::Vec<2>, 1>& electric_field_rz_on_particle,
+    const core::TMatrix<core::Vec<2>, 1>& force,
     double dt)
 {
     const size_t n = species.n();
     auto* v = species.v();
     auto* x = species.x();
 
-    const double qm = species.q() / species.m();
+    const double k = species.q() / species.m();
 
     for (size_t i = 0; i < n; i++) {
-        const double Er = electric_field_rz_on_particle[i].x;
-        const double Ez = electric_field_rz_on_particle[i].y;
+        const double Ez = force[i].x;
+        const double Er = force[i].y;
 
         const double vz = v[i].x;
         const double vr = v[i].y;
         const double v_theta = v[i].z;
 
-        const double current_r = x[i].y;
+        const double r = x[i].y;
 
         double az, ar, atheta;
 
-        az = qm * Ez;
+        az = k * Ez;
 
-        if (current_r > 1e-15) {
-            ar = qm * Er + v_theta * v_theta / current_r;
-            atheta = -vr * v_theta / current_r;
+        if (r > 1e-15) {
+            ar = k * Er + v_theta * v_theta / r;
+            atheta = -vr * v_theta / r;
         } else {
             ar = 0.0;
             atheta = 0.0;
 
-            if (std::abs(current_r) < 1e-15) {
+            if (std::abs(r) < 1e-15) {
                 v[i].y = 0.0;
                 v[i].z = 0.0;
                 }
