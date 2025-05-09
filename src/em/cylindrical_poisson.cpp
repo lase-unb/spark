@@ -70,12 +70,6 @@ private:
     core::Matrix<2> input_cache_;
     std::vector<BoundaryRef> boundary_refs_;
 };
-    double radial_coefficient_plus(int i, double dr) {
-        return (i + 1) / (dr * (i + 0.5));
-    }
-    double radial_coefficient_minus(int i, double dr) {
-        return (i) / (dr * (i + 0.5));
-    }
 
 void CylindricalPoissonSolver2D::Impl::create_grid() {
     HYPRE_StructGridCreate(MPI_COMM_WORLD, 2, &hypre_grid_);
@@ -111,13 +105,16 @@ void CylindricalPoissonSolver2D::Impl::set_cells() {
 }
 
 void CylindricalPoissonSolver2D::Impl::set_stencils() {
-    const auto [sx, sy] = prop_.extents;
-    const double dr = prop_.dx.x;
-    const double dz = prop_.dx.y;
+    const auto [sz, sr] = cells_.size();
+    const auto [dz, dr] = prop_.dx;
 
-    for (int i = 0; i < sx; ++i) {
-        for (int j = 0; j < sy; ++j) {
+    const double idz2 = 1.0 / (dz * dz);
+    const double idr2 = 1.0 / (dr * dr);
+
+    for (int i = 0; i < sz; ++i) {
+        for (int j = 0; j < sr; ++j) {
             int index[] = {i, j};
+            
             auto cell = cells_(i, j).cell_type;
 
             double coeff_center = 0.0;
@@ -126,18 +123,21 @@ void CylindricalPoissonSolver2D::Impl::set_stencils() {
             double coeff_down = 0.0;
             double coeff_up = 0.0;
 
-            if (i == 0) {
-                coeff_right = radial_coefficient_plus(0, dr);
-                coeff_left = 0.0;
+            if (j == 0) {
+                coeff_center = -4.0 * idr2 - 2.0 * idz2;
+                coeff_left = idz2;
+                coeff_right = idz2;
+                coeff_down = 0.0;
+                coeff_up = 4.0 * idr2;
             } else {
-                coeff_right = radial_coefficient_plus(i, dr);
-                coeff_left = radial_coefficient_minus(i, dr);
+                double rj = static_cast<double>(j) * dr;
+
+                coeff_left = idz2;
+                coeff_right = idz2;
+                coeff_down = idr2 - 0.5 / (rj * dr);
+                coeff_up = idr2 + 0.5 / (rj * dr);
+                coeff_center = - (coeff_left + coeff_right + coeff_down + coeff_up);
             }
-
-            coeff_down = 1.0 / (dz * dz);
-            coeff_up = 1.0 / (dz * dz);
-
-            coeff_center = - (coeff_left + coeff_right + coeff_down + coeff_up);
 
             double stencil[5] = {coeff_center, coeff_left, coeff_right, coeff_down, coeff_up};
 
