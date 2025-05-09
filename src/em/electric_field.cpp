@@ -1,4 +1,5 @@
 #include "spark/em/electric_field.h"
+#include "spark/core/matrix.h"
 
 using namespace spark;
 
@@ -10,6 +11,7 @@ T clamp(T min, T max, T d) {
 }
 }  // namespace
 
+namespace spark::em {
 template <>
 void em::electric_field<1>(const spatial::UniformGrid<1>& phi,
                            core::TMatrix<core::Vec<1>, 1>& out) {
@@ -61,3 +63,61 @@ void em::electric_field<2>(const spatial::UniformGrid<2>& phi,
         out(nx - 1, j).x = 2.0 * out(nx - 2, j).x - out(nx - 3, j).x;
     }
 }
+
+void electric_field_cylindrical(const spatial::UniformGrid<2>& phi, core::TMatrix<core::Vec<2>, 2>& out) {
+    out.resize(phi.n());
+    const auto [nz, nr] = out.size().to<int>();
+    const auto& phi_mat = phi.data();
+    const double dr = phi.dx().x;
+    const double dz = phi.dx().y;
+
+    for (int i = 0; i < nz; ++i) {
+        for (int j = 0; j < nr; ++j) {
+            if (i > 0 && i < nz - 1) {
+                out(i, j).y = -(phi_mat(i + 1, j) - phi_mat(i - 1, j)) / (2.0 * dz);
+                
+            } else if (i == 0) {
+                if (nz >= 3) {
+                     out(i, j).y = -(-3.0 * phi_mat(i, j) + 4.0 * phi_mat(i + 1, j) - phi_mat(i + 2, j)) / (2.0 * dz);
+                } else if (nz == 2) {
+                     out(i, j).y = -(phi_mat(i + 1, j) - phi_mat(i, j)) / dz;
+                } else {
+                     out(i, j).y = 0.0;
+                }
+
+            } else if (i == nz - 1) {
+                 if (nz >= 3) {
+                     out(i, j).y = -(phi_mat(i - 2, j) - 4.0 * phi_mat(i - 1, j) + 3.0 * phi_mat(i, j)) / (2.0 * dz);
+                 } else if (nz == 2) {
+                     out(i, j).y = -(phi_mat(i, j) - phi_mat(i - 1, j)) / dz;
+                 } else {
+                      out(i, j).y = 0.0;
+                 }
+            } else {
+                out(i, j).y = 0.0;
+            }
+
+            if (j > 0 && j < nr - 1) {
+                out(i, j).x = -(phi_mat(i, j + 1) - phi_mat(i, j - 1)) / (2.0 * dr);
+            } else if (j == 0) {
+                out(i, j).x = 0.0;
+            } else if (j == nr - 1) {
+                 if (nr >= 3) {
+                     out(i, j).x = -(phi_mat(i, j - 2) - 4.0 * phi_mat(i, j - 1) + 3.0 * phi_mat(i, j)) / (2.0 * dr);
+                 } else if (nr == 2) {
+                      out(i, j).x = -(phi_mat(i, j) - phi_mat(i, j - 1)) / dr;
+                 } else {
+                     out(i, j).x = 0.0;
+                 }
+            } else {
+                out(i, j).x = 0.0;
+            }
+        }
+    }
+}
+
+template void electric_field(const spatial::UniformGrid<1>& phi, core::TMatrix<core::Vec<1>, 1>& out);
+template void electric_field(const spatial::UniformGrid<2>& phi, core::TMatrix<core::Vec<2>, 2>& out);
+void electric_field_cylindrical(const spatial::UniformGrid<2>& phi, core::TMatrix<core::Vec<2>, 2>& out);
+
+} // namespace spark::em
