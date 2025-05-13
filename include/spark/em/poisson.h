@@ -6,7 +6,6 @@
 
 #include "spark/core/vec.h"
 #include "spark/spatial/grid.h"
-#include "spark/core/matrix.h"
 
 namespace spark::em {
 
@@ -45,24 +44,6 @@ public:
     StructPoissonSolver2D(StructPoissonSolver2D&& other) noexcept;
     StructPoissonSolver2D& operator=(StructPoissonSolver2D&& other) noexcept;
     ~StructPoissonSolver2D();
-
-    void solve(core::Matrix<2>& out, const core::Matrix<2>& rho);
-
-private:
-    struct Impl;
-    std::unique_ptr<Impl> impl_;
-};
-
-class CylindricalPoissonSolver2D {
-public:
-    using DomainProp = StructPoissonSolver2D::DomainProp;
-    using Region = StructPoissonSolver2D::Region;
-
-    CylindricalPoissonSolver2D();
-    explicit CylindricalPoissonSolver2D(const DomainProp& prop, const std::vector<Region>& regions);
-    CylindricalPoissonSolver2D(CylindricalPoissonSolver2D&& other) noexcept;
-    CylindricalPoissonSolver2D& operator=(CylindricalPoissonSolver2D&& other) noexcept;
-    ~CylindricalPoissonSolver2D();
 
     void solve(core::Matrix<2>& out, const core::Matrix<2>& rho);
 

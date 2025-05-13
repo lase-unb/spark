@@ -4,7 +4,6 @@
 
 #include "spark/core/matrix.h"
 #include "spark/core/vec.h"
-#include "spark/constants/constants.h"
 
 namespace spark::spatial {
 
@@ -49,37 +48,6 @@ public:
         for (size_t i = 0; i < count; i++) {
             data_[i] = data_[i] * mul + add;
         }
-    }
-
-    T get_radius(size_t i_r) const {
-        return static_cast<T>(i_r) * prop_.dx.y;
-    }
-
-    T get_mid_radius(size_t i_r) const {
-        return (static_cast<T>(i_r) + static_cast<T>(0.5)) * prop_.dx.y;
-    }
-
-    T get_annular_cell_volume(size_t i_r, size_t i_z) const {
-        const T dr = prop_.dx.y;
-        const T dz = prop_.dx.x;
-        T r_outer, r_inner;
-
-        r_outer = get_mid_radius(i_r);
-
-        if (i_r == 0) {
-            r_inner = static_cast<T>(0.0);
-        } else {
-            r_inner = get_mid_radius(i_r - 1);
-        }
-
-        return constants::pi * (r_outer * r_outer - r_inner * r_inner) * dz;
-    }
-
-    void get_cell_area(size_t i_r, size_t i_z, T& area) const {
-        T dr = prop_.dx.y;
-        T dz = prop_.dx.x;
-        T r_center = (static_cast<T>(i_r) + static_cast<T>(0.5)) * dr;
-        area = r_center * dr * dz;
     }
 
 private:
